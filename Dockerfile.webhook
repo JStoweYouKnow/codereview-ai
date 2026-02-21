@@ -16,8 +16,8 @@ RUN pnpm install --frozen-lockfile
 RUN pnpm --filter @codereview-ai/db run build
 RUN pnpm --filter @codereview-ai/webhook-service run build
 
-# Runtime stage
-FROM node:22-alpine
+# Runtime stage (Debian has OpenSSL 3; Alpine + Prisma has compatibility issues)
+FROM node:22-slim
 WORKDIR /app
 
 # Copy built output and deps (pnpm: root + app node_modules for symlink resolution)
