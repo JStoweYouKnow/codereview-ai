@@ -85,8 +85,8 @@ services:
       repo: JStoweYouKnow/codereview-ai
       branch: main
       deploy_on_push: true
-    source_dir: apps/dashboard
-    dockerfile_path: apps/dashboard/Dockerfile
+    source_dir: .
+    dockerfile_path: Dockerfile.dashboard
     http_port: 80
     envs:
       - key: VITE_API_URL
