@@ -32,6 +32,8 @@ COPY --from=builder /app/pnpm-workspace.yaml ./pnpm-workspace.yaml
 COPY --from=builder /app/packages ./packages
 COPY --from=builder /app/apps/webhook-service/dist ./apps/webhook-service/dist
 COPY --from=builder /app/apps/webhook-service/package.json ./apps/webhook-service/package.json
+COPY scripts/docker-entrypoint.sh ./scripts/docker-entrypoint.sh
+RUN chmod +x ./scripts/docker-entrypoint.sh
 
 # Fresh install on Debian + generate Prisma with correct binary (no Alpine linux-musl)
 RUN pnpm install --frozen-lockfile
@@ -39,4 +41,4 @@ RUN cd packages/db && PRISMA_CLI_BINARY_TARGETS=debian-openssl-3.0.x npx prisma 
 
 ENV PORT=3000
 EXPOSE 3000
-CMD ["node", "apps/webhook-service/dist/index.js"]
+CMD ["./scripts/docker-entrypoint.sh"]
