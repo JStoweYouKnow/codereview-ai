@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
 
-const API_URL = import.meta.env.VITE_API_URL || "";
+// When empty, use same origin (dashboard + API on same domain). VITE_API_URL needed only for cross-origin (e.g. local dev).
+const API_URL = import.meta.env.VITE_API_URL || (typeof window !== "undefined" ? window.location.origin : "");
 const REFRESH_MS = 30_000;
 
 // ─── Types ────────────────────────────────────────────────────────────────────
