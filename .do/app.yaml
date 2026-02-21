@@ -45,9 +45,7 @@ services:
       branch: main
       deploy_on_push: true
     source_dir: .
-    environment_slug: node-js
-    build_command: corepack enable pnpm && pnpm install && pnpm --filter @codereview-ai/db run build && pnpm --filter @codereview-ai/webhook-service run build
-    run_command: node apps/webhook-service/dist/index.js
+    dockerfile_path: Dockerfile.webhook
     http_port: 3000
     envs:
       - key: PORT
