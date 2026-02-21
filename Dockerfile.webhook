@@ -5,10 +5,8 @@ WORKDIR /app
 # Enable pnpm
 RUN corepack enable pnpm
 
-# Copy workspace files
-COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
-COPY packages/db packages/db
-COPY apps/webhook-service apps/webhook-service
+# Copy full repo (build context is source_dir: . )
+COPY . .
 
 # Install and build
 RUN pnpm install --frozen-lockfile

@@ -1,0 +1,10 @@
+# Exclude from Docker build context (speeds up webhook build)
+node_modules
+dist
+build
+.git
+*.log
+.venv
+venv
+__pycache__
+*.pyc
