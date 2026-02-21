@@ -86,7 +86,7 @@ services:
       branch: main
       deploy_on_push: true
     source_dir: apps/dashboard
-    dockerfile_path: apps/dashboard/Dockerfile
+    dockerfile_path: Dockerfile
     http_port: 80
     envs:
       - key: VITE_API_URL
