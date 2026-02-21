@@ -8,6 +8,9 @@ RUN corepack enable pnpm
 # Copy full repo (build context is source_dir: . )
 COPY . .
 
+# Ensure workspace config exists (App Platform context may omit it)
+RUN printf 'packages:\n  - "apps/*"\n  - "packages/*"\n' > pnpm-workspace.yaml
+
 # Install and build
 RUN pnpm install --frozen-lockfile
 RUN pnpm --filter @codereview-ai/db run build
@@ -22,7 +25,7 @@ COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/packages ./packages
 COPY --from=builder /app/apps/webhook-service/dist ./apps/webhook-service/dist
 COPY --from=builder /app/apps/webhook-service/package.json ./apps/webhook-service/
-COPY --from=builder /app/package.json pnpm-workspace.yaml ./
+COPY --from=builder /app/package.json ./
 COPY --from=builder /app/apps/webhook-service/package.json ./apps/webhook-service/
 
 ENV PORT=3000
