@@ -1,6 +1,37 @@
-# DigitalOcean App Platform - Replace $REPO with owner/repo (e.g. myorg/codereview-ai)
+# DigitalOcean App Platform - Replace JStoweYouKnow/codereview-ai with owner/repo (e.g. myorg/codereview-ai)
 name: codereview-ai
 region: nyc
+
+ingress:
+  rules:
+    - match:
+        path:
+          prefix: /api
+      component:
+        name: webhook-service
+        preserve_path_prefix: true
+    - match:
+        path:
+          prefix: /health
+      component:
+        name: webhook-service
+        preserve_path_prefix: true
+    - match:
+        path:
+          prefix: /webhooks
+      component:
+        name: webhook-service
+        preserve_path_prefix: true
+    - match:
+        path:
+          prefix: /inference
+      component:
+        name: inference-service
+    - match:
+        path:
+          prefix: /
+      component:
+        name: dashboard
 
 databases:
   - name: codereview-db
@@ -10,13 +41,13 @@ databases:
 services:
   - name: webhook-service
     github:
-      repo: $REPO
+      repo: JStoweYouKnow/codereview-ai
       branch: main
       deploy_on_push: true
-    source_dir: apps/webhook-service
+    source_dir: .
     environment_slug: node-js
-    build_command: npm install && npm run build
-    run_command: node dist/index.js
+    build_command: corepack enable pnpm && pnpm install && pnpm --filter @codereview-ai/db run build && pnpm --filter @codereview-ai/webhook-service run build
+    run_command: node apps/webhook-service/dist/index.js
     http_port: 3000
     envs:
       - key: PORT
@@ -38,7 +69,7 @@ services:
 
   - name: inference-service
     github:
-      repo: $REPO
+      repo: JStoweYouKnow/codereview-ai
       branch: main
       deploy_on_push: true
     source_dir: apps/inference-service
@@ -54,7 +85,7 @@ services:
 static_sites:
   - name: dashboard
     github:
-      repo: $REPO
+      repo: JStoweYouKnow/codereview-ai
       branch: main
       deploy_on_push: true
     source_dir: apps/dashboard
