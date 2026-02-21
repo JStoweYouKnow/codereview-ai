@@ -17,20 +17,24 @@ RUN pnpm install --frozen-lockfile
 RUN pnpm --filter @codereview-ai/db run build
 RUN pnpm --filter @codereview-ai/webhook-service run build
 
-# Runtime: Debian - install openssl so Prisma detects OpenSSL 3 and uses debian-openssl-3.0.x binary
+# Runtime: Debian - fresh install so Prisma generates correct binary (no Alpine pollution)
 FROM node:22-bookworm-slim
 RUN apt-get update -y && apt-get install -y openssl ca-certificates && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
 
-# Copy built output and deps (pnpm: root + app node_modules for symlink resolution)
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/packages ./packages
-COPY --from=builder /app/apps/webhook-service/node_modules ./apps/webhook-service/node_modules
-COPY --from=builder /app/apps/webhook-service/dist ./apps/webhook-service/dist
-COPY --from=builder /app/apps/webhook-service/package.json ./apps/webhook-service/
-COPY --from=builder /app/package.json ./
+# Enable pnpm
+RUN corepack enable pnpm
 
-# Regenerate Prisma client - force debian-openssl-3.0.x (native fails detection on minimal image)
+# Copy only manifests, lockfile, built output, and schema (no node_modules from Alpine builder)
+COPY --from=builder /app/package.json ./package.json
+COPY --from=builder /app/pnpm-lock.yaml ./pnpm-lock.yaml
+COPY --from=builder /app/pnpm-workspace.yaml ./pnpm-workspace.yaml
+COPY --from=builder /app/packages ./packages
+COPY --from=builder /app/apps/webhook-service/dist ./apps/webhook-service/dist
+COPY --from=builder /app/apps/webhook-service/package.json ./apps/webhook-service/package.json
+
+# Fresh install on Debian + generate Prisma with correct binary (no Alpine linux-musl)
+RUN pnpm install --frozen-lockfile
 RUN cd packages/db && PRISMA_CLI_BINARY_TARGETS=debian-openssl-3.0.x npx prisma generate --schema=./prisma/schema.prisma
 
 ENV PORT=3000
