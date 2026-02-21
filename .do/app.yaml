@@ -1,0 +1,66 @@
+# DigitalOcean App Platform - Replace $REPO with owner/repo (e.g. myorg/codereview-ai)
+name: codereview-ai
+region: nyc
+
+databases:
+  - name: codereview-db
+    engine: PG
+    version: "16"
+
+services:
+  - name: webhook-service
+    github:
+      repo: $REPO
+      branch: main
+      deploy_on_push: true
+    source_dir: apps/webhook-service
+    environment_slug: node-js
+    build_command: npm install && npm run build
+    run_command: node dist/index.js
+    http_port: 3000
+    envs:
+      - key: PORT
+        value: "3000"
+      - key: DATABASE_URL
+        value: ${codereview-db.DATABASE_URL}
+      - key: INFERENCE_SERVICE_URL
+        value: ${inference-service.PUBLIC_URL}
+      - key: GITHUB_APP_ID
+        type: SECRET
+      - key: GITHUB_PRIVATE_KEY
+        type: SECRET
+      - key: GITHUB_WEBHOOK_SECRET
+        type: SECRET
+      - key: GITLAB_TOKEN
+        type: SECRET
+      - key: CORS_ORIGIN
+        value: ${dashboard.PUBLIC_URL}
+
+  - name: inference-service
+    github:
+      repo: $REPO
+      branch: main
+      deploy_on_push: true
+    source_dir: apps/inference-service
+    environment_slug: python
+    run_command: python src/server.py
+    http_port: 8000
+    envs:
+      - key: GRADIENT_MODEL_ACCESS_KEY
+        type: SECRET
+      - key: GRADIENT_MODEL
+        value: "anthropic-claude-3.5-sonnet"
+
+static_sites:
+  - name: dashboard
+    github:
+      repo: $REPO
+      branch: main
+      deploy_on_push: true
+    source_dir: apps/dashboard
+    build_command: npm install && npm run build
+    output_dir: dist
+    envs:
+      - key: VITE_API_URL
+        value: ${webhook-service.PUBLIC_URL}
+        scope: RUN_AND_BUILD_TIME

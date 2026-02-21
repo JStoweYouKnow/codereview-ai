@@ -1,0 +1,117 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Installation {
+  id             String   @id @default(cuid())
+  platform       String   // "github" | "gitlab"
+  installationId String   @unique
+  accountName    String
+  accountType    String   // "user" | "organization"
+  accessToken    String   @db.Text
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  repositories Repository[]
+  reviews      Review[]
+}
+
+model Repository {
+  id             String   @id @default(cuid())
+  installationId String
+  repoId         String   // Platform's repo ID
+  repoName       String
+  repoFullName   String   // e.g., "owner/repo"
+  defaultBranch  String   @default("main")
+  isActive       Boolean  @default(true)
+
+  installation   Installation  @relation(fields: [installationId], references: [id])
+  reviews        Review[]
+  teamPatterns   TeamPattern[]
+
+  @@unique([installationId, repoId])
+}
+
+model Review {
+  id             String   @id @default(cuid())
+  installationId String
+  repositoryId   String
+  prNumber       Int
+  prTitle        String
+  prAuthor       String
+  prUrl          String
+
+  status       String   // "pending" | "analyzing" | "completed" | "failed"
+  filesChanged Int
+  linesAdded    Int
+  linesDeleted  Int
+
+  startedAt   DateTime  @default(now())
+  completedAt DateTime?
+
+  installation Installation @relation(fields: [installationId], references: [id])
+  repository   Repository   @relation(fields: [repositoryId], references: [id])
+  findings    Finding[]
+
+  @@index([repositoryId, prNumber])
+}
+
+model Finding {
+  id       String  @id @default(cuid())
+  reviewId String
+
+  severity  String // "critical" | "warning" | "suggestion"
+  category  String // "security" | "performance" | "style" | "bug" | "quality"
+  title    String
+  description String @db.Text
+  suggestion  String @db.Text
+
+  filePath    String
+  lineStart   Int
+  lineEnd     Int
+  codeSnippet String @db.Text
+
+  confidence Float   // 0.0 - 1.0
+  wasAccepted Boolean? // null = pending, true = dev accepted, false = dev rejected
+
+  commentId   String?
+  commentedAt DateTime?
+
+  createdAt DateTime @default(now())
+
+  review Review @relation(fields: [reviewId], references: [id])
+
+  @@index([reviewId])
+}
+
+model TeamPattern {
+  id           String   @id @default(cuid())
+  repositoryId String
+
+  category    String   // "style" | "architecture" | "naming"
+  pattern     String   @db.Text
+  description String
+  occurrences Int      @default(1)
+  confidence  Float    // How strongly this pattern is preferred
+
+  examples String[] // Code examples
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  repository Repository @relation(fields: [repositoryId], references: [id])
+
+  @@index([repositoryId, category])
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  action    String   // "review_created" | "finding_posted" | "pattern_learned"
+  metadata  Json
+  createdAt DateTime @default(now())
+}

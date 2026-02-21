@@ -1,0 +1,13 @@
+{
+  "name": "@codereview-ai/shared",
+  "version": "0.0.1",
+  "private": true,
+  "main": "types.ts",
+  "types": "types.ts",
+  "exports": {
+    ".": "./types.ts"
+  },
+  "scripts": {
+    "build": "echo 'No build step'"
+  }
+}

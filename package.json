@@ -1,0 +1,21 @@
+{
+  "name": "codereview-ai",
+  "version": "0.0.1",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev:webhook": "pnpm --filter @codereview-ai/webhook-service dev",
+    "dev:inference": "cd apps/inference-service && python src/server.py",
+    "dev:dashboard": "pnpm --filter @codereview-ai/dashboard dev",
+    "build": "pnpm --filter @codereview-ai/webhook-service run build && pnpm --filter @codereview-ai/dashboard run build && pnpm --filter @codereview-ai/db run build",
+    "test": "pnpm --filter @codereview-ai/webhook-service test && cd apps/inference-service && python3 -m pytest tests -v",
+    "test:inference": "cd apps/inference-service && python3 -m pytest tests -v"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^5.1.4",
+    "vite": "^7.3.1"
+  }
+}

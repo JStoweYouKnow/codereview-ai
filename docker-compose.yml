@@ -1,0 +1,31 @@
+services:
+  webhook-service:
+    build: ./apps/webhook-service
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+      - DATABASE_URL=${DATABASE_URL}
+      - INFERENCE_SERVICE_URL=http://inference-service:8000
+      - GITHUB_APP_ID=${GITHUB_APP_ID}
+      - GITHUB_PRIVATE_KEY=${GITHUB_PRIVATE_KEY}
+      - GITHUB_WEBHOOK_SECRET=${GITHUB_WEBHOOK_SECRET}
+      - GITLAB_TOKEN=${GITLAB_TOKEN}
+    depends_on:
+      - inference-service
+
+  inference-service:
+    build:
+      context: ./apps/inference-service
+    ports:
+      - "8000:8000"
+    environment:
+      - GRADIENT_MODEL_ACCESS_KEY=${GRADIENT_MODEL_ACCESS_KEY}
+      - GRADIENT_MODEL=${GRADIENT_MODEL:-anthropic-claude-3.5-sonnet}
+      - GRADIENT_REQUEST_TIMEOUT=${GRADIENT_REQUEST_TIMEOUT:-90}
+
+  dashboard:
+    build:
+      context: ./apps/dashboard
+    ports:
+      - "80:80"
