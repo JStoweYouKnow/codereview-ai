@@ -10,6 +10,10 @@ AI-powered code review for GitHub and GitLab PRs. Receives webhooks, fetches dif
 
 **Program for the People:** CodeReview AI is free to use, self-hostable, and designed to serve open-source maintainers and small teams who can’t afford commercial code review tools. No subscription, no usage caps for self-hosted deployments. The AI learns your team’s preferences over time, reducing noise and improving feedback quality.
 
+### Why We Built This
+
+We built CodeReview AI because commercial code review tools cost $15–50 per developer per month — out of reach for open-source projects and small teams. Unlike static linters or one-size-fits-all AI, **CodeReview AI learns from your feedback**: when you Accept a finding, it extracts your team's patterns. After 3+ accepts per repo, future reviews adapt to your conventions. You get senior-level feedback without the noise or the price tag.
+
 ### What Makes This Different
 
 Unlike static linters or generic AI review tools, **CodeReview AI learns from your feedback**. When you **Accept** a finding, the system uses it to extract your team's coding patterns (style, architecture, naming). After 3+ accepted findings per repo, future reviews adapt to your conventions—fewer false positives, more relevant suggestions. You get AI review quality without the noise, and without paying per-seat SaaS fees.

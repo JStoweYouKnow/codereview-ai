@@ -14,6 +14,8 @@ If your repo is on GitHub:
 4. Add secrets: `GRADIENT_MODEL_ACCESS_KEY`, `GITHUB_APP_ID`, `GITHUB_PRIVATE_KEY`, `GITHUB_WEBHOOK_SECRET`
 5. Deploy — App Platform provisions DB, webhook, inference, and dashboard
 
+> **Troubleshooting:** See [DEPLOY_TROUBLESHOOTING.md](./DEPLOY_TROUBLESHOOTING.md) for database permission issues and startup failures.
+
 **Dashboard URL:** `https://<your-app>.ondigitalocean.app` (or your custom domain)
 
 ---

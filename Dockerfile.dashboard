@@ -1,5 +1,9 @@
 # Dashboard - build from repo root, context is apps/dashboard
 FROM node:22-alpine AS builder
+# VITE_API_URL must be passed as build-arg so Vite can inline it (App Platform: RUN_AND_BUILD_TIME)
+ARG VITE_API_URL
+ENV VITE_API_URL=$VITE_API_URL
+
 WORKDIR /app
 COPY apps/dashboard/package.json apps/dashboard/package-lock.json ./
 RUN npm ci

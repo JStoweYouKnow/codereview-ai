@@ -100,6 +100,8 @@ const InboxIcon   = (p: SvgProps) => <svg viewBox="0 0 24 24" {...base} {...p}><
 const ChevronDownIcon = (p: SvgProps) => <svg viewBox="0 0 24 24" {...base} {...p}><polyline points="6 9 12 15 18 9"/></svg>;
 const ChevronUpIcon   = (p: SvgProps) => <svg viewBox="0 0 24 24" {...base} {...p}><polyline points="18 15 12 9 6 15"/></svg>;
 const ExternalLinkIcon = (p: SvgProps) => <svg viewBox="0 0 24 24" {...base} {...p}><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>;
+const HelpCircleIcon = (p: SvgProps) => <svg viewBox="0 0 24 24" {...base} {...p}><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>;
+const InfoIcon       = (p: SvgProps) => <svg viewBox="0 0 24 24" {...base} {...p}><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>;
 
 // ─── Toast Component ──────────────────────────────────────────────────────────
 
@@ -140,6 +142,15 @@ export default function App() {
   const [hintDismissed, setHintDismissed] = useState(() =>
     typeof localStorage !== "undefined" && localStorage.getItem("codereview-hint-dismissed") === "1"
   );
+  const [modal, setModal] = useState<"how" | "about" | null>(null);
+
+  // Close modal on Escape
+  useEffect(() => {
+    if (!modal) return;
+    const fn = (e: KeyboardEvent) => { if (e.key === "Escape") setModal(null); };
+    document.addEventListener("keydown", fn);
+    return () => document.removeEventListener("keydown", fn);
+  }, [modal]);
 
   // Toast helpers
   const addToast = useCallback((message: string, type: ToastItem["type"] = "error") => {
@@ -245,6 +256,7 @@ export default function App() {
         body: JSON.stringify({ wasAccepted }),
       });
       if (!res.ok) throw new Error("Update failed");
+      addToast(wasAccepted ? "Accepted — AI will use this to learn your patterns" : "Rejected", "success");
       setFindingsMap(prev => {
         const next = { ...prev };
         for (const rid of Object.keys(next)) {
@@ -288,7 +300,11 @@ export default function App() {
               <div
                 className={`ai-status ${aiStatus.configured ? "ai-ready" : "ai-demo"}`}
                 aria-label={aiStatus.configured ? "AI ready" : "AI demo mode"}
-                title={aiStatus.configured ? `Gradient AI: ${aiStatus.model ?? "configured"}` : "Gradient key not set — demo findings only"}
+                title={
+                  aiStatus.configured
+                    ? `Powered by DigitalOcean Gradient™ AI${aiStatus.model && aiStatus.model !== "configured" ? ` (${aiStatus.model})` : ""}`
+                    : "Gradient key not set — demo findings only. Set GRADIENT_MODEL_ACCESS_KEY for real AI reviews."
+                }
               >
                 <span className={`ai-dot ${aiStatus.configured ? "ready" : "demo"}`} aria-hidden="true" />
                 <span>{aiStatus.configured ? "AI Ready" : "AI Demo"}</span>
@@ -298,6 +314,15 @@ export default function App() {
               <span className="live-dot" aria-hidden="true" />
               <span>Live</span>
             </div>
+            <button
+              type="button"
+              className="btn-icon"
+              onClick={() => setModal("how")}
+              aria-label="How it works"
+              title="How it works"
+            >
+              <HelpCircleIcon />
+            </button>
             <button
               type="button"
               className={`btn-icon${refreshing ? " is-spinning" : ""}`}
@@ -351,6 +376,15 @@ export default function App() {
           <h1 className="page-title">Dashboard</h1>
           <p className="page-subtitle">AI-powered code review insights for GitHub & GitLab</p>
           <p className="page-persona" role="doc-subtitle">Reviews are direct, constructive, and focused on real issues.</p>
+        </div>
+        )}
+
+        {/* Impact callout — judges / Program for the People */}
+        {!apiError && !loading && (
+        <div className={`impact-callout reveal reveal-delay-2`} role="region" aria-label="Impact">
+          <p className="impact-callout-text">
+            <strong>For OSS maintainers and small teams.</strong> 5+ hours saved per week on review cycles. No per-seat fees. Self-hosted on your infra. Built for those who can&apos;t afford $15–50/dev/mo tools.
+          </p>
         </div>
         )}
 
@@ -694,7 +728,7 @@ export default function App() {
       {/* ── Footer ── */}
       <footer className="footer">
         <div className="footer-inner">
-          <span className="footer-impact">Open source · Free · Self-hosted</span>
+          <span className="footer-impact">Program for the People · Open source · Free · Self-hosted</span>
           <span>
             Built with
             <span className="footer-dot">·</span>
@@ -702,9 +736,56 @@ export default function App() {
               DigitalOcean Gradient™ AI
             </a>
           </span>
+          <button type="button" className="footer-link-btn" onClick={() => setModal("about")}>
+            About
+          </button>
           <span>CodeReview AI · Hackathon 2026</span>
         </div>
       </footer>
+
+      {/* ── Modals: How it works / About ── */}
+      {modal && (
+        <div
+          className="modal-overlay"
+          onClick={() => setModal(null)}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby={modal === "how" ? "modal-how-title" : "modal-about-title"}
+        >
+          <div className="modal-content" onClick={e => e.stopPropagation()}>
+            <button type="button" className="modal-close" onClick={() => setModal(null)} aria-label="Close">
+              <XIcon />
+            </button>
+            {modal === "how" ? (
+              <>
+                <h2 id="modal-how-title" className="modal-title">How it works</h2>
+                <ol className="modal-steps">
+                  <li><strong>Generate demo</strong> — Create sample findings with one click (no webhooks needed).</li>
+                  <li><strong>Accept 3+ findings</strong> — Tell the AI what matters to your team.</li>
+                  <li><strong>AI learns patterns</strong> — Future reviews adapt to your conventions. Fewer false positives.</li>
+                </ol>
+                <div className="modal-gradient-badge">
+                  <span>Powered by</span>
+                  <a href="https://www.digitalocean.com/products/gradient" target="_blank" rel="noopener noreferrer">
+                    DigitalOcean Gradient™ AI
+                  </a>
+                  <span>— all AI analysis uses Gradient Serverless Inference exclusively.</span>
+                </div>
+              </>
+            ) : (
+              <>
+                <h2 id="modal-about-title" className="modal-title">Why we built this</h2>
+                <p className="modal-about-p">
+                  Unlike static linters or generic AI tools, <strong>CodeReview AI learns from your feedback</strong>. When you Accept a finding, it extracts your team&apos;s patterns — style, architecture, naming. After 3+ accepts per repo, future reviews adapt to your conventions.
+                </p>
+                <p className="modal-about-p">
+                  We built this for <strong>open-source maintainers and small teams</strong> who can&apos;t afford commercial code review tools ($15–50/dev/mo). MIT licensed, self-hosted, no vendor lock-in. The AI gets smarter the more you use it.
+                </p>
+              </>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* ── Toast notifications ── */}
       <div className="toast-container" aria-label="Notifications">

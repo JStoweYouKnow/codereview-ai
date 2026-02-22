@@ -33,11 +33,7 @@ ingress:
       component:
         name: dashboard
 
-databases:
-  - name: codereview-db
-    engine: PG
-    version: "16"
-
+# Use external managed PostgreSQL - set DATABASE_URL (doadmin) in App Platform UI for webhook-service
 services:
   - name: webhook-service
     github:
@@ -47,11 +43,17 @@ services:
     source_dir: .
     dockerfile_path: Dockerfile.webhook
     http_port: 3000
+    health_check:
+      initial_delay_seconds: 60
+      period_seconds: 10
+      timeout_seconds: 5
+      http_path: /health
+      port: 3000
     envs:
       - key: PORT
         value: "3000"
       - key: DATABASE_URL
-        value: ${codereview-db.DATABASE_URL}
+        type: SECRET
       - key: INFERENCE_SERVICE_URL
         value: ${inference-service.PUBLIC_URL}
       - key: GITHUB_APP_ID
@@ -89,6 +91,7 @@ services:
     dockerfile_path: Dockerfile.dashboard
     http_port: 80
     envs:
+      # Override VITE_API_URL in App Platform UI with your app URL (bindable vars fail at Docker build)
       - key: VITE_API_URL
         value: ${webhook-service.PUBLIC_URL}
         scope: RUN_AND_BUILD_TIME

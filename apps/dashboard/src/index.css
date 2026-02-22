@@ -453,6 +453,111 @@ code, kbd, samp, pre {
   font-style: italic;
 }
 
+/* ── Impact callout ────────────────────────────────────────────────────────── */
+.impact-callout {
+  padding: 0.875rem 1.25rem;
+  background: var(--accent-green-dim);
+  border: 1px solid var(--accent-green-border);
+  border-radius: var(--r-lg);
+  margin-bottom: 1.75rem;
+}
+
+.impact-callout-text {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  margin: 0;
+  line-height: 1.5;
+}
+
+.impact-callout-text strong { color: var(--text-primary); }
+
+/* ── Modal ─────────────────────────────────────────────────────────────────── */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+}
+
+.modal-content {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: var(--r-xl);
+  padding: 1.75rem;
+  max-width: 440px;
+  width: 100%;
+  position: relative;
+  box-shadow: var(--shadow-lg);
+}
+
+.modal-close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  border-radius: var(--r-md);
+  transition: background var(--t-fast), color var(--t-fast);
+}
+
+.modal-close:hover { background: var(--bg-hover); color: var(--text-primary); }
+
+.modal-title {
+  font-family: var(--font-display);
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 2rem 1.25rem 0;
+}
+
+.modal-steps {
+  padding-left: 1.25rem;
+  margin: 0 0 1.25rem;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  line-height: 1.7;
+}
+
+.modal-steps li { margin-bottom: 0.5rem; }
+
+.modal-gradient-badge {
+  padding: 0.75rem 1rem;
+  background: var(--accent-blue-dim);
+  border: 1px solid var(--accent-blue-border);
+  border-radius: var(--r-md);
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
+}
+
+.modal-gradient-badge a {
+  color: var(--accent-blue);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.modal-gradient-badge a:hover { text-decoration: underline; }
+
+.modal-about-p {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin: 0 0 1rem;
+}
+
+.modal-about-p:last-child { margin-bottom: 0; }
+
 /* ── Stats grid ────────────────────────────────────────────────────────────── */
 .stats-grid {
   display: grid;
@@ -1292,6 +1397,19 @@ code, kbd, samp, pre {
 }
 
 .footer-inner a:hover { color: var(--text-primary); }
+
+.footer-link-btn {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  font-size: inherit;
+  cursor: pointer;
+  padding: 0;
+  margin: 0 0 0 0.5rem;
+  transition: color var(--t-fast);
+}
+
+.footer-link-btn:hover { color: var(--text-primary); }
 
 .footer-impact {
   font-weight: 600;

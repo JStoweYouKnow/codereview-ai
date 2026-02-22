@@ -155,9 +155,15 @@ router.get("/status", async (_req, res) => {
       const { data } = await axios.get(`${inferenceUrl}/health`, {
         timeout: 5000,
       });
+      const rawModel = data?.gradient?.model ?? null;
+      // Never expose secrets (e.g. if GRADIENT_MODEL was misconfigured with access key)
+      const safeModel =
+        rawModel && typeof rawModel === "string" && !rawModel.startsWith("sk-") && rawModel.length < 80
+          ? rawModel
+          : rawModel ? "configured" : null;
       gradient = {
         configured: data?.gradient?.configured ?? false,
-        model: data?.gradient?.model ?? null,
+        model: safeModel,
       };
     } catch {
       /* inference unreachable */

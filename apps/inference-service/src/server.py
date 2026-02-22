@@ -5,14 +5,24 @@ app = Flask(__name__)
 engine = ClaudeReviewEngine()
 
 
+def _safe_model_name(name: str | None) -> str | None:
+    """Never expose secrets (e.g. if GRADIENT_MODEL was misconfigured with access key)."""
+    if not name or not isinstance(name, str):
+        return None
+    if name.startswith("sk-") or len(name) > 80:
+        return "configured"
+    return name
+
+
 @app.route("/health", methods=["GET"])
 def health():
     gradient_ready = engine.client is not None
+    model = _safe_model_name(engine.model) if gradient_ready else None
     return jsonify({
         "status": "healthy",
         "gradient": {
             "configured": gradient_ready,
-            "model": engine.model if gradient_ready else None,
+            "model": model,
         },
     })
 
